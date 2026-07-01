@@ -16,9 +16,7 @@ import contactRoutes from "./routes/contact.routes";
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
-app.use(morgan("dev"));
+
 
 app.get("/", (_, res) => {
   res.json({
@@ -29,14 +27,29 @@ app.get("/", (_, res) => {
 
 
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://ak-travels-frontend.vercel.app",
+];
+
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: (origin, callback) => {
+      // Allow requests with no origin (Postman, curl, etc.)
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );
 
 app.use(express.json());
+app.use(morgan("dev"));
+
+
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/vehicles", vehicleRoutes);
