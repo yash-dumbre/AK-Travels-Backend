@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+}
+
+enum VehicleType {
+  SEDAN
+  SUV
+  LUXURY
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum TripType {
+  LOCAL
+  OUTSTATION
+  AIRPORT
+}
+
+model User {
+  id       String   @id @default(cuid())
+  name     String
+  email    String   @unique
+  password String
+  role     UserRole @default(ADMIN)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Vehicle {
+  id String @id @default(cuid())
+
+  name String
+  type VehicleType
+
+  vehicleNumber String @unique
+
+  seats   Int
+  luggage Int
+
+  fuel         String
+  transmission String
+
+  year  Int
+  color String
+
+  airConditioned Boolean
+
+  rating Float @default(5)
+
+  tripType TripType
+
+  pricePerKm Decimal @db.Decimal(10, 2)
+
+  description String
+
+  featured Boolean @default(false)
+
+  available Boolean @default(true)
+
+  images   VehicleImage[]
+  features VehicleFeature[]
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VehicleImage {
+  id String @id @default(cuid())
+
+  imageUrl String
+
+  isPrimary Boolean @default(false)
+
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+}
+
+model VehicleFeature {
+  id String @id @default(cuid())
+
+  feature String
+
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+}
+
+model Booking {
+  id String @id @default(cuid())
+
+  bookingNumber String @unique
+
+  customerName  String
+  customerPhone String
+  customerEmail String?
+
+  pickup      String
+  destination String
+
+  pickupDate DateTime
+
+  tripType TripType
+
+  notes String?
+
+  status BookingStatus @default(PENDING)
+
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Contact {
+  id String @id @default(cuid())
+
+  name    String
+  phone   String
+  email   String?
+  message String
+
+  createdAt DateTime @default(now())
+}
+
+model CompanySetting {
+  id String @id @default(cuid())
+
+  companyName String
+
+  phone    String
+  whatsapp String
+
+  email String
+
+  address String
+
+  googleMap String?
+
+  facebook  String?
+  instagram String?
+  youtube   String?
+
+  logo    String?
+  favicon String?
+
+  aboutUs            String?
+  termsAndConditions String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
